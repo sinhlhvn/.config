@@ -3,28 +3,35 @@ local config = wezterm.config_builder()
 
 -- Font: prefer a Nerd Font for icons in shells/editors, fall back gracefully.
 config.font = wezterm.font_with_fallback({
-  { family = "JetBrainsMono Nerd Font", weight = "Regular" },
-  { family = "JetBrains Mono", weight = "Regular" },
-  { family = "FiraCode Nerd Font" },
-  { family = "Fira Code" },
-  { family = "Menlo" },
+	{ family = "JetBrainsMono Nerd Font", weight = "Regular" },
+	{ family = "JetBrains Mono", weight = "Regular" },
+	{ family = "FiraCode Nerd Font" },
+	{ family = "Fira Code" },
+	{ family = "Menlo" },
 })
 config.font_size = 14.0
 config.line_height = 1.1
 config.cell_width = 1.0
 config.harfbuzz_features = { "calt=1", "clig=1", "liga=1" } -- ligatures on
 config.freetype_load_target = "Light"
-config.freetype_render_target = "HorizontalLcd"
+config.freetype_render_target = "Normal"
 
--- Theme
-config.color_scheme = "Tokyo Night"
+-- Theme: follow macOS appearance
+local function scheme_for_appearance(appearance)
+	if appearance:find("Dark") then
+		return "Catppuccin Mocha"
+	else
+		return "Catppuccin Latte"
+	end
+end
+config.color_scheme = scheme_for_appearance(wezterm.gui.get_appearance())
 
 -- Window
 config.initial_cols = 140
 config.initial_rows = 40
 config.window_decorations = "RESIZE"
 config.window_padding = { left = 12, right = 12, top = 8, bottom = 8 }
-config.window_background_opacity = 0.98
+config.window_background_opacity = 1.0
 config.macos_window_background_blur = 20
 config.adjust_window_size_when_changing_font_size = false
 config.native_macos_fullscreen_mode = true
@@ -52,9 +59,9 @@ config.webgpu_power_preference = "HighPerformance"
 -- Shell behavior
 config.audible_bell = "Disabled"
 config.visual_bell = {
-  fade_in_duration_ms = 75,
-  fade_out_duration_ms = 75,
-  target = "CursorColor",
+	fade_in_duration_ms = 75,
+	fade_out_duration_ms = 75,
+	target = "CursorColor",
 }
 config.exit_behavior = "Close"
 

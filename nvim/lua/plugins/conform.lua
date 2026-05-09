@@ -13,7 +13,7 @@ return {
         typescript = { "prettier" },
         markdown = { "prettier" },
         xml = { "xmlformat" },
-        http = { "kulala-fmt" }
+        http = { "kulala-fmt" },
       },
     },
   },
