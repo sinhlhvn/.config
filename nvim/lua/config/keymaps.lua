@@ -1,0 +1,14 @@
+-- Keymaps are automatically loaded on the VeryLazy event
+-- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+-- Add any additional keymaps here
+-- local dapui = require("dapui")
+vim.keymap.set("i", "jk", "<Esc>", { noremap = true, silent = true })
+-- vim.keymap.set("n", "<leader>ds", function()
+--   dapui.float_element("scopes", {
+--     title = "Scopes",
+--     position = "center",
+--     width = 120,
+--     height = 40,
+--     enter = true, -- auto focus
+--   })
+-- end, { desc = "DAP Scopes" })
