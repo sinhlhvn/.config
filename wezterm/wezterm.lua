@@ -16,15 +16,18 @@ config.harfbuzz_features = { "calt=1", "clig=1", "liga=1" } -- ligatures on
 config.freetype_load_target = "Light"
 config.freetype_render_target = "Normal"
 
--- Theme: follow macOS appearance
-local function scheme_for_appearance(appearance)
-	if appearance:find("Dark") then
-		return "Catppuccin Mocha"
+-- Theme toggle (Ctrl+Shift+D): switches between dark and light
+config.color_scheme = "Catppuccin Mocha"
+
+wezterm.on("toggle-theme", function(window)
+	local overrides = window:get_config_overrides() or {}
+	if overrides.color_scheme == "Catppuccin Mocha" then
+		overrides.color_scheme = "Catppuccin Latte"
 	else
-		return "Catppuccin Latte"
+		overrides.color_scheme = "Catppuccin Mocha"
 	end
-end
-config.color_scheme = scheme_for_appearance(wezterm.gui.get_appearance())
+	window:set_config_overrides(overrides)
+end)
 
 -- Window
 config.initial_cols = 140
@@ -67,5 +70,14 @@ config.exit_behavior = "Close"
 
 -- Selection / clipboard
 config.selection_word_boundary = " \t\n{}[]()\"'`,;:│"
+
+-- Key bindings (extend defaults so built-ins like copy/paste are preserved)
+local keys = wezterm.gui.default_keys()
+table.insert(keys, {
+	key = "d",
+	mods = "CTRL|SHIFT",
+	action = wezterm.action.EmitEvent("toggle-theme"),
+})
+config.keys = keys
 
 return config
