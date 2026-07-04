@@ -37,7 +37,7 @@ Always use `wezterm.config_builder()` over a bare table — it validates keys at
 
 ## Gotchas
 
-- `config.keys` **replaces** the default key table entirely — to extend defaults, start from `wezterm.gui.default_keys()` and append, otherwise you'll lose built-ins like copy/paste.
-- Same pattern for `config.mouse_bindings`, `config.key_tables`, and `config.launch_menu`: assignment is a full replacement, not a merge.
+- `config.keys` (and `config.mouse_bindings`) are **merged with** the defaults — built-ins like copy/paste survive unless you set `disable_default_key_bindings = true`. Avoid `wezterm.gui.default_keys()` for this: `wezterm.gui` is `nil` outside the GUI process (e.g. under `wezterm-mux-server`), which breaks the whole config there.
+- `config.launch_menu` is a plain list: assignment is a full replacement, not a merge.
 - `wezterm.on("event-name", fn)` registers event handlers (e.g., `format-tab-title`, `update-status`). Re-`require`ing on reload re-registers — WezTerm dedupes by event+function identity, but anonymous closures on every reload will accumulate. Define handlers as named locals if you see duplicate firings.
 - Color schemes set via `config.color_scheme = "Name"` must match a built-in scheme exactly; for custom palettes use `config.colors = { ... }` instead.

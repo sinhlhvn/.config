@@ -3,11 +3,11 @@ local config = wezterm.config_builder()
 
 -- Font: prefer a Nerd Font for icons in shells/editors, fall back gracefully.
 config.font = wezterm.font_with_fallback({
-	{ family = "JetBrainsMono Nerd Font", weight = "Regular" },
-	{ family = "JetBrains Mono", weight = "Regular" },
-	{ family = "FiraCode Nerd Font" },
-	{ family = "Fira Code" },
-	{ family = "Menlo" },
+  { family = "JetBrainsMono Nerd Font", weight = "Regular" },
+  { family = "JetBrains Mono", weight = "Regular" },
+  { family = "FiraCode Nerd Font" },
+  { family = "Fira Code" },
+  { family = "Menlo" },
 })
 config.font_size = 14.0
 config.line_height = 1.1
@@ -20,13 +20,13 @@ config.freetype_render_target = "Normal"
 config.color_scheme = "Catppuccin Mocha"
 
 wezterm.on("toggle-theme", function(window)
-	local overrides = window:get_config_overrides() or {}
-	if overrides.color_scheme == "Catppuccin Mocha" then
-		overrides.color_scheme = "Catppuccin Latte"
-	else
-		overrides.color_scheme = "Catppuccin Mocha"
-	end
-	window:set_config_overrides(overrides)
+  local overrides = window:get_config_overrides() or {}
+  if (overrides.color_scheme or config.color_scheme) == "Catppuccin Mocha" then
+    overrides.color_scheme = "Catppuccin Latte"
+  else
+    overrides.color_scheme = "Catppuccin Mocha"
+  end
+  window:set_config_overrides(overrides)
 end)
 
 -- Window
@@ -62,22 +62,18 @@ config.webgpu_power_preference = "HighPerformance"
 -- Shell behavior
 config.audible_bell = "Disabled"
 config.visual_bell = {
-	fade_in_duration_ms = 75,
-	fade_out_duration_ms = 75,
-	target = "CursorColor",
+  fade_in_duration_ms = 75,
+  fade_out_duration_ms = 75,
+  target = "CursorColor",
 }
 config.exit_behavior = "Close"
 
 -- Selection / clipboard
 config.selection_word_boundary = " \t\n{}[]()\"'`,;:│"
 
--- Key bindings (extend defaults so built-ins like copy/paste are preserved)
-local keys = wezterm.gui.default_keys()
-table.insert(keys, {
-	key = "d",
-	mods = "CTRL|SHIFT",
-	action = wezterm.action.EmitEvent("toggle-theme"),
-})
-config.keys = keys
+-- Key bindings (merged with defaults, so built-ins like copy/paste are preserved)
+config.keys = {
+  { key = "d", mods = "CTRL|SHIFT", action = wezterm.action.EmitEvent("toggle-theme") },
+}
 
 return config
