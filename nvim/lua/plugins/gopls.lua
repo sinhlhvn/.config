@@ -13,9 +13,7 @@ return {
           if client.server_capabilities.semanticTokensProvider then
             return
           end
-          local cap = client.config
-            and client.config.capabilities
-            and client.config.capabilities.textDocument
+          local cap = client.config and client.config.capabilities and client.config.capabilities.textDocument
           local semantic = cap and cap.semanticTokens
           if not semantic then
             return

@@ -1,9 +1,6 @@
 return {
   {
     "stevearc/conform.nvim",
-    dependencies = { "mason.nvim" },
-    lazy = false,
-    cmd = "ConformInfo",
     opts = {
       formatters_by_ft = {
         python = { "black" },
@@ -11,7 +8,8 @@ return {
         yaml = { "prettier" },
         html = { "prettier" },
         typescript = { "prettier" },
-        markdown = { "prettier" },
+        -- lists are replaced, not merged, so repeat what lazyvim's lang.markdown extra sets
+        markdown = { "prettier", "markdownlint-cli2", "markdown-toc" },
         xml = { "xmlformat" },
         http = { "kulala-fmt" },
       },

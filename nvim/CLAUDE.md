@@ -19,7 +19,7 @@ A personal Neovim config built on the [LazyVim](https://github.com/LazyVim/LazyV
 
 - **Autoformat is OFF globally** (`vim.g.autoformat = false` in `options.lua`). Format-on-save will not run; use `<leader>cf` (or `:lua require("conform").format()`) to format manually. Don't re-enable without checking with the user.
 - **`jk` is mapped to `<Esc>`** in insert mode (`keymaps.lua`).
-- **`lua/plugins/dap.lua` overrides LazyVim's default dap-ui listeners** by setting `event_initialized`/`event_terminated`/`event_exited` listeners to `nil`. This is intentional — dap-ui is opened manually via `<leader>ds` (floating Scopes window) instead of auto-opening on session start. Preserve this if you touch the dap config.
+- **`lua/plugins/dap.lua` replaces LazyVim's dap-ui `config`** so the listeners that auto-open/close dap-ui on session start/end are never registered. This is intentional — dap-ui is opened manually via `<leader>ds` (floating Scopes window; LazyVim's default `<leader>ds` Session mapping is disabled). Preserve this if you touch the dap config.
 - **Conform formatter map** lives in `lua/plugins/conform.lua` (python→black, json/yaml/html/typescript/markdown→prettier, xml→xmlformat, http→kulala-fmt). Mason must have these tools installed; check with `:Mason`.
 - **fzf-lua `files` picker** is configured with `hidden = true, git_ignore = false` — it shows dotfiles and gitignored files. Useful here, surprising elsewhere.
 - **`lua/plugins/example.lua`** is the LazyVim sample file and short-circuits with `if true then return {} end`. It is documentation, not active config — don't "fix" it.
