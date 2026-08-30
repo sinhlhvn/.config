@@ -1,0 +1,9 @@
+[theme]
+name = "terminal"
+auto_switch = false
+
+[keys]
+copy_mode = "prefix+["
+
+[ui]
+agent_panel_sort = "spaces"

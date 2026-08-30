@@ -7,6 +7,10 @@ vim.g.autoformat = false
 vim.opt.title = true
 vim.opt.titlestring = '%t%( %M%)%( (%{expand("%:~:.:h")})%) - nvim'
 
+-- Give floating windows rounded corners by default. Plugins that request
+-- their own border explicitly can still override this per window.
+vim.opt.winborder = "rounded"
+
 vim.opt.guicursor = {
   "n-v-c:block",
   "i-ci-ve:ver25",

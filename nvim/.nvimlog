@@ -1,0 +1,9 @@
+WRN 2026-08-02T18:47:48.533 c/nvim.65706.0 server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/RYFaGk/nvim.73574.0
+WRN 2026-08-02T18:47:53.842 c/nvim.65706.0 server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/Xc7NID/nvim.73598.0
+WRN 2026-08-02T21:37:10.638 ?.12234    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/TmWIZR/nvim.12234.0
+WRN 2026-08-10T01:00:23.468 ?.51798    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/b9XFbY/nvim.51798.0
+WRN 2026-08-10T01:00:29.272 ?.51826    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/vutZ4s/nvim.51826.0
+WRN 2026-08-10T01:00:34.206 ?.51849    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/5yhXsZ/nvim.51849.0
+WRN 2026-08-10T01:00:39.099 ?.51876    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/agsuHO/nvim.51876.0
+WRN 2026-08-10T01:00:55.334 ?.51984    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/k40rzr/nvim.51984.0
+WRN 2026-08-10T01:30:44.531 ?.61056    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/8N55BF/nvim.61056.0

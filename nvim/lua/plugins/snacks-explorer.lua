@@ -116,10 +116,17 @@ end
 -- NonText dimming with plain hidden files. Ignored files/dirs get their own
 -- muted colour + italics, and the git-status column keeps its `!`/ignore
 -- icon. Re-applied on colorscheme change so it survives theme switches.
+--
+-- Use Dracula's muted comment colour so ignored paths remain legible without
+-- competing with normal files or git status colours.
+local function ignored_fg()
+  return "#6272a4"
+end
+
 local function set_ignored_hl()
   vim.api.nvim_set_hl(0, "SnacksPickerPathIgnored", { link = "SnacksExplorerIgnored" })
   vim.api.nvim_set_hl(0, "SnacksPickerGitStatusIgnored", { link = "SnacksExplorerIgnored" })
-  vim.api.nvim_set_hl(0, "SnacksExplorerIgnored", { fg = "#7a6a3a", italic = true })
+  vim.api.nvim_set_hl(0, "SnacksExplorerIgnored", { fg = ignored_fg(), italic = true })
 end
 vim.api.nvim_create_autocmd("ColorScheme", { callback = set_ignored_hl })
 

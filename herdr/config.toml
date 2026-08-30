@@ -1,0 +1,102 @@
+onboarding = false
+[theme]
+# The shared theme controller changes `name` and reloads Herdr. Keeping
+# auto_switch off avoids inferring a semantic mode from OSC background colour.
+name = "dracula"
+auto_switch = false
+dark_name = "dracula"
+light_name = "dracula"
+
+[theme.custom]
+# Dracula's darker chrome keeps navigation distinct from terminal panes.
+panel_bg = "#21222c"
+
+[keys]
+prefix = "ctrl+b"
+
+# pane: nvim <-> agent
+zoom            = "prefix+z"
+last_pane       = "prefix+tab"      # nhảy qua lại 2 pane vừa dùng
+edit_scrollback = "prefix+e"        # scrollback -> nvim (thay tmux copy-mode)
+
+# agent-centric
+next_agent       = "prefix+a"
+previous_agent   = "prefix+shift+a"
+focus_agent      = "prefix+alt+1..9"
+goto             = "prefix+g"
+workspace_picker = "prefix+w"
+
+# worktree cho parallel agents
+new_worktree  = "prefix+shift+g"
+open_worktree = "prefix+shift+o"
+
+[[keys.command]]
+key = "prefix+alt+g"
+type = "popup"
+command = "lazygit"
+width = "90%"
+height = "90%"
+
+[ui]
+# Attention queue rather than grouping: with six agents live across six spaces,
+# what needs input matters more than which project it belongs to. The `workspace`
+# token in the agent rows below supplies the context this ordering drops.
+agent_panel_sort = "priority"
+prompt_new_workspace_name = true
+show_agent_labels_on_pane_borders = true
+
+# Chrome only when it carries information: gaps + borders make the split
+# structure readable, the scrollbar column and a single-tab tab row do not.
+pane_borders = true
+pane_gaps = true
+pane_scrollbars = false
+hide_tab_bar_when_single_tab = false
+tab_bar_position = "top"
+
+# Leave enough room for workspace context without turning navigation into a
+# second content pane. Herdr can still grow for unusually long labels.
+sidebar_width = 32
+sidebar_min_width = 28
+sidebar_max_width = 34
+
+# Keep the selection without touching the clipboard. Reading agent output means
+# dragging across a lot of text, and the default silently overwrites whatever
+# was copied. Ctrl+C (or Cmd+C when the host forwards it) still copies.
+copy_on_select = false
+
+# Dracula purple for highlights, borders, and the active tab.
+#
+# Herdr accepts an accent in two places: here, and as a `[theme.custom].accent`
+# token. Which one wins is not observable through the CLI or the API, so the
+# accent lives only here: if this key is authoritative the controller keeps it
+# correct, and if it is not, the theme's own per-flavour accent applies, which
+# is correct by construction. Setting the token as well would only reintroduce
+# a second value to keep in sync.
+accent = "#bd93f9"
+
+[ui.toast]
+delivery = "system"
+# Debounce state changes. Six parallel agents flap between working and idle
+# often enough that the 1s default turns into notification noise.
+delay_seconds = 3
+
+[ui.sound]
+enabled = true
+
+# Keep both sidebar lists compact. Do not pin token colours here so Herdr's
+# contextual styles continue to follow Dracula.
+[ui.sidebar.spaces]
+row_gap = 0
+rows = [["state_icon", "workspace"], ["branch", "git_status"]]
+
+[ui.sidebar.agents]
+row_gap = 0
+rows = [["state_icon", "workspace", "tab"], ["agent"]]
+
+# Claude reports what it is doing in the terminal title; surface it so the
+# sidebar says which agent is on what, not just that one is busy.
+[ui.sidebar.agents.rows_by_agent]
+claude = [["state_icon", "workspace", "tab"], ["terminal_title_stripped"], ["agent"]]
+
+[experimental]
+switch_ascii_input_source_in_prefix = true

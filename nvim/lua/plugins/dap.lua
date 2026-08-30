@@ -4,8 +4,20 @@ return {
     keys = {
       -- free up <leader>ds (LazyVim maps it to dap.session) for the Scopes float below
       { "<leader>ds", false },
-      { "<leader>do", function() require("dap").step_over() end, desc = "Step Over" },
-      { "<leader>dO", function() require("dap").step_out() end, desc = "Step Out" },
+      {
+        "<leader>do",
+        function()
+          require("dap").step_over()
+        end,
+        desc = "Step Over",
+      },
+      {
+        "<leader>dO",
+        function()
+          require("dap").step_out()
+        end,
+        desc = "Step Out",
+      },
     },
   },
   {

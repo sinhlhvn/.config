@@ -1,0 +1,161 @@
+#!/bin/zsh
+
+# Reconcile the semantic dark/light mode across Herdr and Neovim instances
+# hosted by the current Herdr server. WezTerm updates its own window first.
+
+set -u
+
+# WezTerm runs this through background_child_process, so the child inherits the
+# GUI process' PATH (/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin when WezTerm
+# was launched from Finder). ~/.zprofile is only sourced by login shells and
+# this shebang is not one, so herdr and nvim would silently fall out of
+# `command -v` and both reconciliation blocks below would no-op.
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+
+# Diagnostics go to a file: WezTerm discards a background child's stderr, which
+# is what let the PATH failure above go unnoticed.
+log_file="${XDG_STATE_HOME:-$HOME/.local/state}/terminal-theme/apply-theme.log"
+log() {
+  mkdir -p "${log_file:h}"
+  print -r -- "$(date '+%Y-%m-%dT%H:%M:%S%z') $*" >>"$log_file"
+}
+
+mode="${1:-}"
+source_mode="${2:---manual}"
+
+if [[ "$mode" != "dark" && "$mode" != "light" ]]; then
+  print -u2 "usage: apply-theme <dark|light> [--manual|--auto]"
+  exit 2
+fi
+if [[ "$source_mode" != "--manual" && "$source_mode" != "--auto" ]]; then
+  print -u2 "apply-theme: invalid source mode: $source_mode"
+  exit 2
+fi
+
+state_root="${XDG_STATE_HOME:-$HOME/.local/state}/terminal-theme"
+mkdir -p "$state_root"
+print -r -- "$mode" >"$state_root/mode"
+if [[ "$source_mode" == "--manual" ]]; then
+  print -r -- "manual" >"$state_root/override"
+else
+  rm -f "$state_root/override"
+fi
+
+# Keep Herdr and Neovim on Dracula while WezTerm continues tracking the saved
+# appearance mode internally.
+theme_name="dracula"
+panel_bg="#21222c"
+accent="#bd93f9"
+
+herdr_config="${HERDR_CONFIG_PATH:-$HOME/.config/herdr/config.toml}"
+if [[ -f "$herdr_config" ]] && command -v herdr >/dev/null 2>&1; then
+  candidate="$(mktemp "${herdr_config}.theme.XXXXXX")" || exit 1
+  awk -v theme="$theme_name" -v panel="$panel_bg" -v accent="$accent" '
+    BEGIN {
+      in_theme = 0; in_custom = 0; in_ui = 0
+      changed_theme = 0; changed_panel = 0; changed_accent = 0
+    }
+    /^\[theme\][[:space:]]*$/ { in_theme = 1; in_custom = 0; in_ui = 0 }
+    /^\[theme\.custom\][[:space:]]*$/ { in_theme = 0; in_custom = 1; in_ui = 0 }
+    /^\[ui\][[:space:]]*$/ { in_theme = 0; in_custom = 0; in_ui = 1 }
+    /^\[/ && !/^\[theme\][[:space:]]*$/ && !/^\[theme\.custom\][[:space:]]*$/ && !/^\[ui\][[:space:]]*$/ {
+      in_theme = 0
+      in_custom = 0
+      in_ui = 0
+    }
+    in_theme && /^[[:space:]]*name[[:space:]]*=/ {
+      print "name = \"" theme "\""
+      changed_theme = 1
+      next
+    }
+    in_theme && /^[[:space:]]*auto_switch[[:space:]]*=/ {
+      print "auto_switch = false"
+      next
+    }
+    in_custom && /^[[:space:]]*panel_bg[[:space:]]*=/ {
+      print "panel_bg = \"" panel "\""
+      changed_panel = 1
+      next
+    }
+    in_ui && /^[[:space:]]*accent[[:space:]]*=/ {
+      print "accent = \"" accent "\""
+      changed_accent = 1
+      next
+    }
+    { print }
+    END { if (!changed_theme || !changed_panel || !changed_accent) exit 42 }
+  ' "$herdr_config" >"$candidate"
+  awk_status=$?
+
+  if (( awk_status == 0 )) && HERDR_CONFIG_PATH="$candidate" herdr config check >/dev/null 2>&1; then
+    if ! cmp -s "$candidate" "$herdr_config"; then
+      config_mode="$(stat -f '%Lp' "$herdr_config" 2>/dev/null || print 600)"
+      chmod "$config_mode" "$candidate"
+      mv "$candidate" "$herdr_config"
+    else
+      rm -f "$candidate"
+    fi
+    herdr server reload-config >/dev/null 2>&1 || true
+  else
+    rm -f "$candidate"
+    print -u2 "apply-theme: refused invalid Herdr config"
+    log "refused invalid Herdr config (awk_status=$awk_status)"
+  fi
+elif [[ -f "$herdr_config" ]]; then
+  print -u2 "apply-theme: herdr not on PATH; Herdr left on the previous theme"
+  log "herdr not found on PATH=$PATH"
+fi
+
+# Fetch process metadata concurrently: a session can have many panes, and
+# serial socket round-trips make a theme toggle visibly lag. One session
+# snapshot defines the exact scope; no host-wide process matching is used.
+if command -v herdr >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  session_snapshot="$(herdr api snapshot 2>/dev/null)"
+  process_root="$(mktemp -d "${TMPDIR%/}/herdr-theme.XXXXXX")" || exit 1
+
+  pane_ids=("${(@f)$(print -r -- "$session_snapshot" | jq -r '.result.snapshot.panes[].pane_id')}")
+  agent_pane_ids=("${(@f)$(print -r -- "$session_snapshot" | jq -r '.result.snapshot.agents[].pane_id')}")
+
+  for pane_id in "${pane_ids[@]}"; do
+    herdr pane process-info --pane "$pane_id" >"$process_root/$pane_id.json" 2>/dev/null &
+  done
+  wait
+
+  # Scope updates to Neovim processes that are foreground applications in this
+  # Herdr session. Dracula is dark-only, so keep Neovim's background semantic
+  # fixed even if macOS reports a light appearance.
+  if command -v nvim >/dev/null 2>&1; then
+    socket_root="${TMPDIR%/}/nvim.${USER}"
+    for process_file in "$process_root"/*.json(N); do
+      jq -r '.result.process_info.foreground_processes[] | select(.argv0 == "nvim" or .name == "nvim") | .pid' \
+        "$process_file" | while IFS= read -r pid; do
+          [[ "$pid" == <-> ]] || continue
+          # LazyVim may be a UI client attached to a direct `nvim --embed`
+          # child. Accept only the foreground PID and its direct Neovim child.
+          server_pids=("$pid")
+          while IFS= read -r child_pid; do
+            [[ "$child_pid" == <-> ]] && server_pids+=("$child_pid")
+          done < <(pgrep -P "$pid" -x nvim 2>/dev/null)
+
+          for server_pid in "${server_pids[@]}"; do
+            for socket in "$socket_root"/*/nvim."$server_pid".*(N); do
+              locked="$(nvim --server "$socket" --remote-expr 'get(g:, "theme_lock", v:false)' 2>/dev/null)" || continue
+              [[ "$locked" == "1" ]] && continue
+              nvim --server "$socket" --remote-expr "execute('set background=dark')" >/dev/null 2>&1 || true
+            done
+          done
+        done
+    done
+  fi
+
+  # Codex, Claude, and other full-screen agents may cache terminal colours
+  # until their next resize. SIGWINCH requests a redraw without interrupting
+  # the process or conversation.
+  for pane_id in "${agent_pane_ids[@]}"; do
+    agent_pid="$(jq -r '.result.process_info.foreground_process_group_id // empty' "$process_root/$pane_id.json")"
+    [[ "$agent_pid" == <-> ]] || continue
+    kill -WINCH "$agent_pid" 2>/dev/null || log "could not redraw agent pane=$pane_id pid=$agent_pid"
+  done
+
+  rm -rf "$process_root"
+fi

@@ -1,0 +1,2 @@
+WRN 2026-08-10T00:59:49.191 ?.51662    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/WLn13K/nvim.51662.0
+WRN 2026-08-10T01:00:05.864 ?.51716    server_start:199: Failed to start server: operation not permitted: /var/folders/c9/nnmmy2zs6_db9gsz8f1m72h80000gn/T/nvim.macos/AyY12n/nvim.51716.0
